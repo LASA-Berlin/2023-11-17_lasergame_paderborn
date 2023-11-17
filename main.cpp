@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <DmxSimple.h>
 #include <MIDI.h>
 #include <SoftwareSerial.h>
@@ -39,17 +38,16 @@ const int pinLaser6 = 43;
 const int pinLaser7 = 41;
 const int pinLaser8 = 39;
 
-const int reset = 5;
+const int pin_alarm = 21 const int reset = 5;
 const int unscharf = 6;
 const int Applaus = 7;
 const int resetAntenne = 13;
-const int fussKnopf = 37; // Bisher noch nicht angeschlossen
 const int unscharfAntenne = 11;
-const int ApplausAntenne = 10; // nicht angelötet
+const int ApplausAntenne = 10;
 const int tueren = 22;
+const int fussKnopf = 37;  // Bisher noch nicht angeschlossen
 
-void AlleLaserAn()
-{
+void AlleLaserAn() {
   StatusLaser1 = true;
   StatusLaser2 = true;
   StatusLaser3 = true;
@@ -60,8 +58,7 @@ void AlleLaserAn()
   StatusLaser8 = true;
 }
 
-void AlleLaserAus()
-{
+void AlleLaserAus() {
   StatusLaser1 = false;
   StatusLaser2 = false;
   StatusLaser3 = false;
@@ -72,8 +69,7 @@ void AlleLaserAus()
   StatusLaser8 = false;
 }
 
-void UpdateLaser()
-{
+void UpdateLaser() {
   digitalWrite(pinLaser1, StatusLaser1);
   digitalWrite(pinLaser2, StatusLaser2);
   digitalWrite(pinLaser3, StatusLaser3);
@@ -84,16 +80,13 @@ void UpdateLaser()
   digitalWrite(pinLaser8, StatusLaser8);
 }
 
-void chaser()
-{
-  int laser[8] = {53, 51, 49, 47, 45, 43, 41, 39};
-  int laserState[8] = {StatusLaser1, StatusLaser2, StatusLaser3, StatusLaser4, StatusLaser5, StatusLaser6, StatusLaser7, StatusLaser8};
+void chaser() {
+  int laser[8] = { 53, 51, 49, 47, 45, 43, 41, 39 };
+  int laserState[8] = { StatusLaser1, StatusLaser2, StatusLaser3, StatusLaser4, StatusLaser5, StatusLaser6, StatusLaser7, StatusLaser8 };
 
   // einen an, kurze warten
-  for (int i = 0; i < 8; i++)
-  {
-    if (laserState[i] == 0)
-    {
+  for (int i = 0; i < 8; i++) {
+    if (laserState[i] == 0) {
       digitalWrite(laser[i], HIGH);
       MIDI.sendNoteOn(38, 100, 10);
       delay(110);
@@ -101,30 +94,33 @@ void chaser()
   }
 }
 
-void PlayAlarm() { MIDI.sendNoteOn(40, 100, 10); }
+void PlayAlarm() {
+  MIDI.sendNoteOn(40, 100, 10);
+}
 
-void PlayApplaus() { MIDI.sendNoteOn(41, 100, 10); }
+void PlayApplaus() {
+  MIDI.sendNoteOn(41, 100, 10);
+}
 
-void DMXAlarmOn()
-{
+void DMXAlarmOn() {
   DmxSimple.write(33, 0);
   DmxSimple.write(34, 0);
   DmxSimple.write(35, 255);
   DmxSimple.write(36, 255);
-  DmxSimple.write(37, 155); // 155
+  DmxSimple.write(37, 155);  // 155
+    digitalWrite(pin_alarm, HIGH);
 }
 
-void DMXAlarmOff()
-{
+void DMXAlarmOff() {
   DmxSimple.write(33, 255);
   DmxSimple.write(34, 155);
   DmxSimple.write(35, 0);
   DmxSimple.write(36, 0);
-  DmxSimple.write(37, 0); // 155
+  DmxSimple.write(37, 0);  // 155
+  digitalWrite(pin_alarm, LOW);
 }
 
-void setup()
-{
+void setup() {
   // Shiel und Libary Initialisierung
   pinMode(2, OUTPUT);
   digitalWrite(2, HIGH);
@@ -134,9 +130,10 @@ void setup()
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   // Pindeklaration:
-  // pinMode(reset, INPUT);    //  Taster für Reset, wartet auf HIGH
-  // pinMode(unscharf, INPUT); // Taster für Unscharf, wartet auf HIGH
-  // pinMode(Applaus, INPUT);
+  // pins warten auf ein HIGH
+  pinMode(reset, INPUT);
+  pinMode(unscharf, INPUT);
+  pinMode(Applaus, INPUT);
   pinMode(resetAntenne, INPUT);
   pinMode(unscharfAntenne, INPUT);
   pinMode(ApplausAntenne, INPUT);
@@ -156,45 +153,38 @@ void setup()
   MIDI.sendNoteOn(41, 0, 10);
 }
 
-void loop()
-{
+void loop() {
   // wenn Sensor dunkel, passenden Laser aus und alarm an!
-  if (StatusLaser1 == true && analogRead(sensor5) < schwelle)
-  {
+  if (StatusLaser1 == true && analogRead(sensor5) < schwelle) {
     StatusLaser1 = false;
     alarm = true;
   }
-  if (StatusLaser2 == true && analogRead(sensor4) < schwelle)
-  {
+  if (StatusLaser2 == true && analogRead(sensor4) < schwelle) {
     StatusLaser2 = false;
     alarm = true;
-  } 
+  }
   if (StatusLaser3 == true && analogRead(sensor2) < schwelle) {
     StatusLaser3 = false;
     alarm = true;
   }
-  if (StatusLaser4 == true && analogRead(sensor1) < schwelle)
-  {
+  if (StatusLaser4 == true && analogRead(sensor1) < schwelle) {
     StatusLaser4 = false;
     alarm = true;
   }
-  if (StatusLaser5 == true && analogRead(sensor3) < schwelle)
-  {
+  if (StatusLaser5 == true && analogRead(sensor3) < schwelle) {
     StatusLaser5 = false;
     alarm = true;
   }
-  if (StatusLaser6 == true && analogRead(sensor6) < schwelle)
-  {
+  if (StatusLaser6 == true && analogRead(sensor6) < schwelle) {
     StatusLaser6 = false;
     alarm = true;
   }
 
-  UpdateLaser(); // Hier werden die Laser geschalten, vor allem anderem!
+  UpdateLaser();  // Hier werden die Laser geschalten, vor allem anderem!
 
   // haben wir einen Reset? Dann alle Laser wieder an und Alarm aus!å
-  // digitalRead(reset) == HIGH || 
-  if (digitalRead(resetAntenne) == HIGH)
-  {
+  // digitalRead(reset) == HIGH ||
+  if (digitalRead(resetAntenne) == HIGH) {
     spiel_laeuft = true;
     alarm = false;
     DMXAlarmOff();
@@ -207,9 +197,8 @@ void loop()
   }
 
   // haben wir einen Alarm OFF? Dann alle Laser aus! und alarm bleibt aus!
-  // digitalRead(unscharf) == HIGH || 
-  if (digitalRead(unscharfAntenne) == HIGH)
-  {
+  // digitalRead(unscharf) == HIGH ||
+  if (digitalRead(unscharfAntenne) == HIGH) {
     alarm = false;
     spiel_laeuft = false;
     AlleLaserAus();
@@ -223,8 +212,7 @@ void loop()
     PlayApplaus();
   }*/
 
-  if (alarm == true && spiel_laeuft == true)
-  {
+  if (alarm == true && spiel_laeuft == true) {
     PlayAlarm();
     DMXAlarmOn();
     alarm = false;
@@ -234,8 +222,7 @@ void loop()
   }
 
   unsigned long refTime = millis();
-  if ((refTime - timerAlarm) >= 8000)
-  {
+  if ((refTime - timerAlarm) >= 8000) {
     DMXAlarmOff();
   }
-} // loop
+}  // loop
